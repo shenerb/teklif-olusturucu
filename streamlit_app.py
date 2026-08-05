@@ -268,39 +268,27 @@ def excel_olustur(urunler, musteri_adi, musteri_sehir, teklif_no, teklif_tarihi,
     return len(urunler)
 
 def _reg_pdf_fonts():
-    import glob
-    # Mevcut fontları logla
-    found = glob.glob("/usr/share/fonts/**/*.ttf", recursive=True)
-    print("=== MEVCUT TTF FONTLAR ===")
-    for f in sorted(found)[:30]:
-        print(f)
-    
+    # Önce repo içindeki fontlara bak (Streamlit Cloud için)
+    base = os.path.dirname(os.path.abspath(__file__))
+    local_reg  = os.path.join(base, "DejaVuSans.ttf")
+    local_bold = os.path.join(base, "DejaVuSans-Bold.ttf")
+
     candidates = [
-        # DejaVu — Streamlit Cloud'da mevcut, Türkçe destekler
+        (local_reg, local_bold),
         ("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
          "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"),
-        # Liberation — Linux
         ("/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
          "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf"),
-        # Ubuntu font
-        ("/usr/share/fonts/truetype/ubuntu/Ubuntu-R.ttf",
-         "/usr/share/fonts/truetype/ubuntu/Ubuntu-B.ttf"),
-        # Windows
         (r"C:\Windows\Fonts\arial.ttf",   r"C:\Windows\Fonts\arialbd.ttf"),
         (r"C:\Windows\Fonts\calibri.ttf", r"C:\Windows\Fonts\calibrib.ttf"),
     ]
     for reg, bold in candidates:
-        print(f"Deneniyor: {reg} -> exists={os.path.exists(reg)}")
         if os.path.exists(reg) and os.path.exists(bold):
             try:
                 pdfmetrics.registerFont(TTFont("Sans",     reg))
                 pdfmetrics.registerFont(TTFont("SansBold", bold))
-                print(f"KULLANILAN FONT: {reg}")
                 return ("Sans", "SansBold")
-            except Exception as e:
-                print(f"Font hatası: {e}")
-                continue
-    print("Helvetica kullanılıyor!")
+            except: continue
     return ("Helvetica", "Helvetica-Bold")
 
 def _fmt_euro(val):
