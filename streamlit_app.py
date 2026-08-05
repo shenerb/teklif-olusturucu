@@ -268,15 +268,17 @@ def excel_olustur(urunler, musteri_adi, musteri_sehir, teklif_no, teklif_tarihi,
     return len(urunler)
 
 def _reg_pdf_fonts():
-    # Önce repo içindeki fontlara bak (Streamlit Cloud için)
     base = os.path.dirname(os.path.abspath(__file__))
-    local_reg  = os.path.join(base, "DejaVuSans.ttf")
-    local_bold = os.path.join(base, "DejaVuSans-Bold.ttf")
-
     candidates = [
-        (local_reg, local_bold),
-        ("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
-         "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"),
+        # FreeSans — repo içinde, Türkçe destekler, temiz görünüm
+        (os.path.join(base, "FreeSans.ttf"),
+         os.path.join(base, "FreeSansBold.ttf")),
+        # DejaVu — yedek
+        (os.path.join(base, "DejaVuSans.ttf"),
+         os.path.join(base, "DejaVuSans-Bold.ttf")),
+        # Sistem fontları
+        ("/usr/share/fonts/truetype/freefont/FreeSans.ttf",
+         "/usr/share/fonts/truetype/freefont/FreeSansBold.ttf"),
         ("/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
          "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf"),
         (r"C:\Windows\Fonts\arial.ttf",   r"C:\Windows\Fonts\arialbd.ttf"),
