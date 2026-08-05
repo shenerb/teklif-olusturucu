@@ -122,7 +122,7 @@ def _thin():
 def excel_olustur(urunler, musteri_adi, musteri_sehir, teklif_no, teklif_tarihi,
                   teslim_suresi, teslimat, alt_notlar, iletisim, indirim, cikti):
     wb = Workbook(); ws = wb.active; ws.title = "Sheet1"
-    for col, w in [("A",7.11),("B",69.55),("C",5.66),("D",15.44),("E",15.66),("F",7.11)]:
+    for col, w in [("A",5.5),("B",69.55),("C",5.66),("D",15.44),("E",15.66),("F",7.11)]:
         ws.column_dimensions[col].width = w
     ws.sheet_view.view = "normal"
     ws.sheet_view.showGridLines = False
@@ -360,7 +360,7 @@ def pdf_olustur(urunler, musteri_adi, musteri_sehir, teklif_no, teklif_tarihi,
     story += [mt, Spacer(1, 4*mm)]
 
     # Ürün tablosu
-    C0=0.8*cm; C2=1.3*cm; C3=2.8*cm; C4=2.8*cm; C1=CW-C0-C2-C3-C4
+    C0=1.2*cm; C2=1.3*cm; C3=2.8*cm; C4=2.8*cm; C1=CW-C0-C2-C3-C4
     tbl = [[
         hpara("<b>No</b>",           sty("h0",fontName=FONT_BOLD,fontSize=8,alignment=TA_CENTER,leading=10)),
         hpara("<b>AÇIKLAMA</b>",     sty("h1",fontName=FONT_BOLD,fontSize=9,alignment=TA_CENTER,leading=11)),
