@@ -268,6 +268,13 @@ def excel_olustur(urunler, musteri_adi, musteri_sehir, teklif_no, teklif_tarihi,
     return len(urunler)
 
 def _reg_pdf_fonts():
+    import glob
+    # Mevcut fontları logla
+    found = glob.glob("/usr/share/fonts/**/*.ttf", recursive=True)
+    print("=== MEVCUT TTF FONTLAR ===")
+    for f in sorted(found)[:30]:
+        print(f)
+    
     candidates = [
         # DejaVu — Streamlit Cloud'da mevcut, Türkçe destekler
         ("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
@@ -283,12 +290,17 @@ def _reg_pdf_fonts():
         (r"C:\Windows\Fonts\calibri.ttf", r"C:\Windows\Fonts\calibrib.ttf"),
     ]
     for reg, bold in candidates:
+        print(f"Deneniyor: {reg} -> exists={os.path.exists(reg)}")
         if os.path.exists(reg) and os.path.exists(bold):
             try:
                 pdfmetrics.registerFont(TTFont("Sans",     reg))
                 pdfmetrics.registerFont(TTFont("SansBold", bold))
+                print(f"KULLANILAN FONT: {reg}")
                 return ("Sans", "SansBold")
-            except: continue
+            except Exception as e:
+                print(f"Font hatası: {e}")
+                continue
+    print("Helvetica kullanılıyor!")
     return ("Helvetica", "Helvetica-Bold")
 
 def _fmt_euro(val):
