@@ -191,7 +191,11 @@ def excel_olustur(urunler, musteri_adi, musteri_sehir, teklif_no, teklif_tarihi,
     # Tablo başlığı
     ws.row_dimensions[21].height = 30
     for col, val in [("A","No"),("B","AÇIKLAMA"),("C","ADET"),("D","BİRİM FİYAT"),("E","TOPLAM FİYAT")]:
-        c = ws[f"{col}21"]; c.value = val; c.font = n12; c.alignment = ctr; c.border = _thin()
+        c = ws[f"{col}21"]; c.value = val; c.font = n12; c.border = _thin()
+        if col == "A":
+            c.alignment = Alignment(horizontal="center", vertical="center", wrap_text=False)
+        else:
+            c.alignment = ctr
 
     def rb():
         from openpyxl.styles import Border as B, Side as S
