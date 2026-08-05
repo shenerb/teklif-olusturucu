@@ -197,7 +197,7 @@ def excel_olustur(urunler, musteri_adi, musteri_sehir, teklif_no, teklif_tarihi,
         from openpyxl.styles import Border as B, Side as S
         t = S(style="thin"); return B(left=t, right=t, top=t, bottom=t)
 
-    DS = 25; r = DS
+    DS = 22; r = DS
     for idx, urun in enumerate(urunler, 1):
         adet = urun.get("adet", 1)
         ws.row_dimensions[r].height = max(15, min(urun["aciklama"].count("\n")*13.8+13.8, 600))
@@ -216,10 +216,11 @@ def excel_olustur(urunler, musteri_adi, musteri_sehir, teklif_no, teklif_tarihi,
 
     # TOPLAM → İNDİRİM → NET TOPLAM
     tr = r + 1
+    rmid = Alignment(horizontal="right", vertical="center")
 
-    # 1) TOPLAM (ürünler toplamı)
+    # 1) TOPLAM
     toplam_r = tr
-    ws[f"B{tr}"].value = "TOPLAM"; ws[f"B{tr}"].font = b12; ws[f"B{tr}"].alignment = lmid
+    ws[f"D{tr}"].value = "TOPLAM"; ws[f"D{tr}"].font = b12; ws[f"D{tr}"].alignment = rmid
     ws[f"E{tr}"].value = f"=SUM(E{DS}:E{r-1})"
     ws[f"E{tr}"].font = b12; ws[f"E{tr}"].number_format = EURO_FMT
     tr += 1
@@ -227,15 +228,14 @@ def excel_olustur(urunler, musteri_adi, musteri_sehir, teklif_no, teklif_tarihi,
     if indirim and indirim > 0:
         # 2) İNDİRİM
         indirim_r = tr
-        ws[f"B{tr}"].value = "İNDİRİM"; ws[f"B{tr}"].font = b12; ws[f"B{tr}"].alignment = lmid
+        ws[f"D{tr}"].value = "İNDİRİM"; ws[f"D{tr}"].font = b12; ws[f"D{tr}"].alignment = rmid
         ws[f"E{tr}"].value = indirim; ws[f"E{tr}"].font = b12; ws[f"E{tr}"].number_format = EURO_FMT
         tr += 1
 
-        # 3) Net tutar (etiketsiz, sadece tutar — çizgi üstünde)
+        # 3) Net tutar
         net_r = tr
         ws[f"E{tr}"].value = f"=E{toplam_r}-E{indirim_r}"
         ws[f"E{tr}"].font = b12; ws[f"E{tr}"].number_format = EURO_FMT
-        # Üstüne çizgi
         from openpyxl.styles import Border, Side as Sd
         top_border = Border(top=Sd(style="thin"))
         ws[f"E{tr}"].border = top_border
