@@ -269,8 +269,16 @@ def excel_olustur(urunler, musteri_adi, musteri_sehir, teklif_no, teklif_tarihi,
 
 def _reg_pdf_fonts():
     candidates = [
+        # DejaVu — Streamlit Cloud'da mevcut, Türkçe destekler
+        ("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+         "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"),
+        # Liberation — Linux
         ("/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
          "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf"),
+        # Ubuntu font
+        ("/usr/share/fonts/truetype/ubuntu/Ubuntu-R.ttf",
+         "/usr/share/fonts/truetype/ubuntu/Ubuntu-B.ttf"),
+        # Windows
         (r"C:\Windows\Fonts\arial.ttf",   r"C:\Windows\Fonts\arialbd.ttf"),
         (r"C:\Windows\Fonts\calibri.ttf", r"C:\Windows\Fonts\calibrib.ttf"),
     ]
