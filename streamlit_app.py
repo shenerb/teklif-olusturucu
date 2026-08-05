@@ -194,7 +194,8 @@ def excel_olustur(urunler, musteri_adi, musteri_sehir, teklif_no, teklif_tarihi,
         c = ws[f"{col}21"]; c.value = val; c.font = n12; c.alignment = ctr; c.border = _thin()
 
     def rb():
-        t = Side(style="thin"); return Border(left=t, right=t, top=t, bottom=t)
+        from openpyxl.styles import Border as B, Side as S
+        t = S(style="thin"); return B(left=t, right=t, top=t, bottom=t)
 
     DS = 25; r = DS
     for idx, urun in enumerate(urunler, 1):
