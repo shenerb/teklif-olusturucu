@@ -13,7 +13,7 @@ try:
     from reportlab.lib.pagesizes import A4
     from reportlab.lib.units import cm, mm
     from reportlab.lib import colors
-    from reportlab.platypus import (BaseDocTemplate, Frame, PageTemplate,
+    from reportlab.platypus import (BaseDocTemplate, SimpleDocTemplate, Frame, PageTemplate,
                                      Table, TableStyle, Paragraph, Spacer,
                                      Image as RLImage, HRFlowable, KeepInFrame)
     from reportlab.lib.styles import ParagraphStyle
@@ -308,7 +308,6 @@ def pdf_olustur(urunler, musteri_adi, musteri_sehir, teklif_no, teklif_tarihi,
         raise ImportError("pip install reportlab")
     FONT, FONT_BOLD = _reg_pdf_fonts()
     PW, PH = A4; MAR = 1.5*cm; CW = PW - 2*MAR
-    from reportlab.platypus import SimpleDocTemplate
     doc = SimpleDocTemplate(cikti, pagesize=A4,
                             leftMargin=MAR, rightMargin=MAR,
                             topMargin=MAR, bottomMargin=MAR)
