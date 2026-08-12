@@ -399,7 +399,7 @@ def pdf_olustur(urunler, musteri_adi, musteri_sehir, teklif_no, teklif_tarihi,
         ])
     NR = len(tbl)
     t = Table(tbl, colWidths=[C0,C1,C2,C3,C4], repeatRows=1,
-              rowHeights=[20]+[None]*(NR-1))
+              rowHeights=[20]+[None]*(NR-1), splitByRow=True)
     t.setStyle(TableStyle([
         ("BACKGROUND",(0,0),(-1,0),colors.HexColor("#d9d9d9")),
         ("VALIGN",(0,0),(-1,0),"MIDDLE"),
@@ -436,8 +436,8 @@ def pdf_olustur(urunler, musteri_adi, musteri_sehir, teklif_no, teklif_tarihi,
     while len(sag_items) < max_len: sag_items.append(Spacer(1, 1*mm))
 
     from reportlab.platypus import KeepInFrame
-    sol_frame  = KeepInFrame(CW*0.55, 200, sol_items)
-    sag_frame  = KeepInFrame(CW*0.4,  200, sag_items)
+    sol_frame  = KeepInFrame(CW*0.55, 200, sol_items, mode='shrink')
+    sag_frame  = KeepInFrame(CW*0.4,  200, sag_items, mode='shrink')
 
     footer_tbl = Table([[sol_frame, sag_frame]], colWidths=[CW*0.62, CW*0.38])
     footer_tbl.setStyle(TableStyle([
