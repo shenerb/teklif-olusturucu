@@ -327,17 +327,14 @@ def pdf_olustur(urunler, musteri_adi, musteri_sehir, teklif_no, teklif_tarihi,
     S_ACK   = sty("ack",   fontSize=8, leading=11)
     S_SM    = sty("sm",    fontSize=8, leading=11)
 
-    # Logo + başlık — kompakt
+    # Logo + başlık — ayrı ayrı ekle, tablo kullanma
     logo_img = RLImage(io.BytesIO(LOGO_BYTES), width=6*cm, height=1.5*cm)
     logo_img.hAlign = "CENTER"
     firma_p = Paragraph(FIRMA_HTML, S_FIRMA)
-    hdr = Table([[logo_img], [firma_p]], colWidths=[CW])
-    hdr.setStyle(TableStyle([
-        ("ALIGN",(0,0),(-1,-1),"CENTER"),
-        ("BOTTOMPADDING",(0,0),(0,0),2),
-        ("BOTTOMPADDING",(0,1),(0,1),4),
-    ]))
-    story += [hdr,
+    story += [logo_img,
+              Spacer(1, 2*mm),
+              firma_p,
+              Spacer(1, 3*mm),
               HRFlowable(width=CW, thickness=1, color=colors.black),
               Spacer(1, 2*mm),
               hpara("<b>FİYAT TEKLİFİ</b>",
