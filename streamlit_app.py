@@ -308,11 +308,10 @@ def pdf_olustur(urunler, musteri_adi, musteri_sehir, teklif_no, teklif_tarihi,
         raise ImportError("pip install reportlab")
     FONT, FONT_BOLD = _reg_pdf_fonts()
     PW, PH = A4; MAR = 1.5*cm; CW = PW - 2*MAR
-    doc = BaseDocTemplate(cikti, pagesize=A4,
-                          leftMargin=MAR, rightMargin=MAR,
-                          topMargin=MAR, bottomMargin=MAR)
-    frame = Frame(MAR, MAR, CW, PH-2*MAR, id="normal")
-    doc.addPageTemplates([PageTemplate(id="main", frames=frame)])
+    from reportlab.platypus import SimpleDocTemplate
+    doc = SimpleDocTemplate(cikti, pagesize=A4,
+                            leftMargin=MAR, rightMargin=MAR,
+                            topMargin=MAR, bottomMargin=MAR)
     story = []
 
     def sty(name, **kw):
@@ -369,14 +368,11 @@ def pdf_olustur(urunler, musteri_adi, musteri_sehir, teklif_no, teklif_tarihi,
         hpara("<b>TOPLAM FİYAT</b>", sty("h4",fontName=FONT_BOLD,fontSize=8,alignment=TA_CENTER,leading=10)),
     ]]
     toplam = 0
-    aciklama_genislik = CW - 1.2*cm - 1.3*cm - 2.8*cm - 2.8*cm
     for i, urun in enumerate(urunler, 1):
         fv = urun["fiyat"]; adet = urun.get("adet",1); toplam += fv * adet
-        aciklama_p = para(urun["aciklama"], S_ACK)
-        aciklama_frame = KeepInFrame(aciklama_genislik, 800, [aciklama_p], mode='shrink')
         tbl.append([
             para(str(i),             sty(f"n{i}", alignment=TA_CENTER, fontSize=8)),
-            aciklama_frame,
+            para(urun["aciklama"],   S_ACK),
             para(str(adet),          sty(f"a{i}", alignment=TA_CENTER, fontSize=8)),
             para(_fmt_euro(fv),      sty(f"b{i}", alignment=TA_RIGHT,  fontSize=8)),
             para(_fmt_euro(fv*adet), sty(f"p{i}", alignment=TA_RIGHT,  fontSize=8)),
