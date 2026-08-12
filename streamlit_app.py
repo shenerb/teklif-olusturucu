@@ -13,7 +13,7 @@ try:
     from reportlab.lib.pagesizes import A4
     from reportlab.lib.units import cm, mm
     from reportlab.lib import colors
-    from reportlab.platypus import (BaseDocTemplate, SimpleDocTemplate, Frame, PageTemplate,
+    from reportlab.platypus import (BaseDocTemplate, Frame, PageTemplate,
                                      Table, TableStyle, Paragraph, Spacer,
                                      Image as RLImage, HRFlowable, KeepInFrame)
     from reportlab.lib.styles import ParagraphStyle
@@ -25,12 +25,7 @@ except ImportError:
     HAS_PDF = False
 
 # Logo dosyadan oku
-try:
-    _BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-except NameError:
-    _BASE_DIR = os.path.abspath(".")
-
-LOGO_PATH = os.path.join(_BASE_DIR, "logo.jpeg")
+LOGO_PATH = os.path.join(os.path.dirname(__file__), "logo.jpeg")
 with open(LOGO_PATH, "rb") as f:
     LOGO_BYTES = f.read()
 
@@ -48,7 +43,7 @@ FIRMA_HTML = (
 )
 EURO_FMT = "#,##0.00\\ [$\u20ac-1]"
 
-AYARLAR_DOSYA = os.path.join(_BASE_DIR, "ayarlar.json")
+AYARLAR_DOSYA = os.path.join(os.path.dirname(__file__), "ayarlar.json")
 
 def ayarlari_yukle():
     v = {"iletisim_ad": "", "iletisim_tel": "", "iletisim_email": ""}
@@ -277,10 +272,7 @@ def excel_olustur(urunler, musteri_adi, musteri_sehir, teklif_no, teklif_tarihi,
     return len(urunler)
 
 def _reg_pdf_fonts():
-    try:
-        base = os.path.dirname(os.path.abspath(__file__))
-    except NameError:
-        base = os.path.abspath(".")
+    base = os.path.dirname(os.path.abspath(__file__))
     candidates = [
         # FreeSans — repo içinde, Türkçe destekler, temiz görünüm
         (os.path.join(base, "FreeSans.ttf"),
@@ -316,9 +308,11 @@ def pdf_olustur(urunler, musteri_adi, musteri_sehir, teklif_no, teklif_tarihi,
         raise ImportError("pip install reportlab")
     FONT, FONT_BOLD = _reg_pdf_fonts()
     PW, PH = A4; MAR = 1.5*cm; CW = PW - 2*MAR
-    doc = SimpleDocTemplate(cikti, pagesize=A4,
-                            leftMargin=MAR, rightMargin=MAR,
-                            topMargin=MAR, bottomMargin=MAR)
+    doc = BaseDocTemplate(cikti, pagesize=A4,
+                          leftMargin=MAR, rightMargin=MAR,
+                          topMargin=MAR, bottomMargin=MAR)
+    frame = Frame(MAR, MAR, CW, PH-2*MAR, id="normal")
+    doc.addPageTemplates([PageTemplate(id="main", frames=frame)])
     story = []
 
     def sty(name, **kw):
@@ -335,19 +329,22 @@ def pdf_olustur(urunler, musteri_adi, musteri_sehir, teklif_no, teklif_tarihi,
     S_ACK   = sty("ack",   fontSize=8, leading=11)
     S_SM    = sty("sm",    fontSize=8, leading=11)
 
-    # Logo + başlık — ayrı ayrı ekle, tablo kullanma
-    logo_img = RLImage(io.BytesIO(LOGO_BYTES), width=6*cm, height=1.5*cm)
+    # Logo + başlık
+    logo_img = RLImage(io.BytesIO(LOGO_BYTES), width=7*cm, height=1.8*cm)
     logo_img.hAlign = "CENTER"
     firma_p = Paragraph(FIRMA_HTML, S_FIRMA)
-    story += [logo_img,
-              Spacer(1, 2*mm),
-              firma_p,
-              Spacer(1, 3*mm),
+    hdr = Table([[logo_img], [firma_p]], colWidths=[CW])
+    hdr.setStyle(TableStyle([
+        ("ALIGN",(0,0),(-1,-1),"CENTER"),
+        ("BOTTOMPADDING",(0,0),(0,0),4),
+        ("BOTTOMPADDING",(0,1),(0,1),8),
+    ]))
+    story += [hdr,
               HRFlowable(width=CW, thickness=1, color=colors.black),
-              Spacer(1, 2*mm),
+              Spacer(1, 3*mm),
               hpara("<b>FİYAT TEKLİFİ</b>",
                     sty("fth", fontName=FONT_BOLD, fontSize=11, alignment=TA_CENTER)),
-              Spacer(1, 2*mm)]
+              Spacer(1, 3*mm)]
 
     # Müşteri + Teklif No/Tarih/Teslim
     meta = [
@@ -360,7 +357,7 @@ def pdf_olustur(urunler, musteri_adi, musteri_sehir, teklif_no, teklif_tarihi,
         meta.append(["", hpara(f"<b>Teslim Süresi :</b>  {teslim_suresi}", sty("mn3", fontName=FONT_BOLD, alignment=TA_RIGHT))])
     mt = Table(meta, colWidths=[CW*0.6, CW*0.4])
     mt.setStyle(TableStyle([("VALIGN",(0,0),(-1,-1),"TOP"),("BOTTOMPADDING",(0,0),(-1,-1),1),("TOPPADDING",(0,0),(-1,-1),1)]))
-    story += [mt, Spacer(1, 2*mm)]
+    story += [mt, Spacer(1, 4*mm)]
 
     # Ürün tablosu
     C0=1.2*cm; C2=1.3*cm; C3=2.8*cm; C4=2.8*cm; C1=CW-C0-C2-C3-C4
@@ -374,24 +371,13 @@ def pdf_olustur(urunler, musteri_adi, musteri_sehir, teklif_no, teklif_tarihi,
     toplam = 0
     for i, urun in enumerate(urunler, 1):
         fv = urun["fiyat"]; adet = urun.get("adet",1); toplam += fv * adet
-        satirlar = [s.strip() for s in urun["aciklama"].split("\n") if s.strip()]
-        # İlk satır: No, ilk açıklama satırı, adet, birim, toplam
         tbl.append([
-            para(str(i),               sty(f"n{i}", alignment=TA_CENTER, fontSize=8)),
-            para(satirlar[0] if satirlar else "", S_ACK),
-            para(str(adet),            sty(f"a{i}", alignment=TA_CENTER, fontSize=8)),
-            para(_fmt_euro(fv),        sty(f"b{i}", alignment=TA_RIGHT,  fontSize=8)),
-            para(_fmt_euro(fv*adet),   sty(f"p{i}", alignment=TA_RIGHT,  fontSize=8)),
+            para(str(i),             sty(f"n{i}", alignment=TA_CENTER, fontSize=8)),
+            para(urun["aciklama"],   S_ACK),
+            para(str(adet),          sty(f"a{i}", alignment=TA_CENTER, fontSize=8)),
+            para(_fmt_euro(fv),      sty(f"b{i}", alignment=TA_RIGHT,  fontSize=8)),
+            para(_fmt_euro(fv*adet), sty(f"p{i}", alignment=TA_RIGHT,  fontSize=8)),
         ])
-        # Sonraki satırlar: sadece açıklama devamı
-        for satir in satirlar[1:]:
-            tbl.append([
-                para("", sty(f"ne{i}", fontSize=8)),
-                para(satir, S_ACK),
-                para("", sty(f"ae{i}", fontSize=8)),
-                para("", sty(f"be{i}", fontSize=8)),
-                para("", sty(f"pe{i}", fontSize=8)),
-            ])
     if indirim and indirim > 0:
         tbl.append(["","","",
             hpara("<b>TOPLAM</b>", sty("tt",fontName=FONT_BOLD,alignment=TA_CENTER)),
@@ -413,7 +399,7 @@ def pdf_olustur(urunler, musteri_adi, musteri_sehir, teklif_no, teklif_tarihi,
         ])
     NR = len(tbl)
     t = Table(tbl, colWidths=[C0,C1,C2,C3,C4], repeatRows=1,
-              rowHeights=[20]+[None]*(NR-1), splitByRow=1)
+              rowHeights=[20]+[None]*(NR-1))
     t.setStyle(TableStyle([
         ("BACKGROUND",(0,0),(-1,0),colors.HexColor("#d9d9d9")),
         ("VALIGN",(0,0),(-1,0),"MIDDLE"),
@@ -450,8 +436,8 @@ def pdf_olustur(urunler, musteri_adi, musteri_sehir, teklif_no, teklif_tarihi,
     while len(sag_items) < max_len: sag_items.append(Spacer(1, 1*mm))
 
     from reportlab.platypus import KeepInFrame
-    sol_frame  = KeepInFrame(CW*0.55, 200, sol_items, mode='shrink')
-    sag_frame  = KeepInFrame(CW*0.4,  200, sag_items, mode='shrink')
+    sol_frame  = KeepInFrame(CW*0.55, 200, sol_items)
+    sag_frame  = KeepInFrame(CW*0.4,  200, sag_items)
 
     footer_tbl = Table([[sol_frame, sag_frame]], colWidths=[CW*0.62, CW*0.38])
     footer_tbl.setStyle(TableStyle([
