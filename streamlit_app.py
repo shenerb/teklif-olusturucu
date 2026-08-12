@@ -327,22 +327,22 @@ def pdf_olustur(urunler, musteri_adi, musteri_sehir, teklif_no, teklif_tarihi,
     S_ACK   = sty("ack",   fontSize=8, leading=11)
     S_SM    = sty("sm",    fontSize=8, leading=11)
 
-    # Logo + başlık
-    logo_img = RLImage(io.BytesIO(LOGO_BYTES), width=7*cm, height=1.8*cm)
+    # Logo + başlık — kompakt
+    logo_img = RLImage(io.BytesIO(LOGO_BYTES), width=6*cm, height=1.5*cm)
     logo_img.hAlign = "CENTER"
     firma_p = Paragraph(FIRMA_HTML, S_FIRMA)
     hdr = Table([[logo_img], [firma_p]], colWidths=[CW])
     hdr.setStyle(TableStyle([
         ("ALIGN",(0,0),(-1,-1),"CENTER"),
-        ("BOTTOMPADDING",(0,0),(0,0),4),
-        ("BOTTOMPADDING",(0,1),(0,1),8),
+        ("BOTTOMPADDING",(0,0),(0,0),2),
+        ("BOTTOMPADDING",(0,1),(0,1),4),
     ]))
     story += [hdr,
               HRFlowable(width=CW, thickness=1, color=colors.black),
-              Spacer(1, 3*mm),
+              Spacer(1, 2*mm),
               hpara("<b>FİYAT TEKLİFİ</b>",
                     sty("fth", fontName=FONT_BOLD, fontSize=11, alignment=TA_CENTER)),
-              Spacer(1, 3*mm)]
+              Spacer(1, 2*mm)]
 
     # Müşteri + Teklif No/Tarih/Teslim
     meta = [
@@ -355,7 +355,7 @@ def pdf_olustur(urunler, musteri_adi, musteri_sehir, teklif_no, teklif_tarihi,
         meta.append(["", hpara(f"<b>Teslim Süresi :</b>  {teslim_suresi}", sty("mn3", fontName=FONT_BOLD, alignment=TA_RIGHT))])
     mt = Table(meta, colWidths=[CW*0.6, CW*0.4])
     mt.setStyle(TableStyle([("VALIGN",(0,0),(-1,-1),"TOP"),("BOTTOMPADDING",(0,0),(-1,-1),1),("TOPPADDING",(0,0),(-1,-1),1)]))
-    story += [mt, Spacer(1, 4*mm)]
+    story += [mt, Spacer(1, 2*mm)]
 
     # Ürün tablosu
     C0=1.2*cm; C2=1.3*cm; C3=2.8*cm; C4=2.8*cm; C1=CW-C0-C2-C3-C4
@@ -369,20 +369,9 @@ def pdf_olustur(urunler, musteri_adi, musteri_sehir, teklif_no, teklif_tarihi,
     toplam = 0
     for i, urun in enumerate(urunler, 1):
         fv = urun["fiyat"]; adet = urun.get("adet",1); toplam += fv * adet
-        # Açıklamayı satırlara böl, her satır ayrı paragraph
-        satirlar = urun["aciklama"].split("\n")
-        aciklama_paragraflar = []
-        for s in satirlar:
-            if s.strip():
-                aciklama_paragraflar.append(para(s.strip(), S_ACK))
-                aciklama_paragraflar.append(Spacer(1, 1))
-        if not aciklama_paragraflar:
-            aciklama_paragraflar = [para(urun["aciklama"], S_ACK)]
-        from reportlab.platypus import KeepInFrame
-        aciklama_cell = KeepInFrame(CW-C0-C2-C3-C4, PH-4*cm, aciklama_paragraflar, mode='shrink')
         tbl.append([
             para(str(i),             sty(f"n{i}", alignment=TA_CENTER, fontSize=8)),
-            aciklama_cell,
+            para(urun["aciklama"],   S_ACK),
             para(str(adet),          sty(f"a{i}", alignment=TA_CENTER, fontSize=8)),
             para(_fmt_euro(fv),      sty(f"b{i}", alignment=TA_RIGHT,  fontSize=8)),
             para(_fmt_euro(fv*adet), sty(f"p{i}", alignment=TA_RIGHT,  fontSize=8)),
@@ -408,7 +397,7 @@ def pdf_olustur(urunler, musteri_adi, musteri_sehir, teklif_no, teklif_tarihi,
         ])
     NR = len(tbl)
     t = Table(tbl, colWidths=[C0,C1,C2,C3,C4], repeatRows=1,
-              rowHeights=[20]+[None]*(NR-1), splitByRow=True)
+              rowHeights=[20]+[None]*(NR-1), splitByRow=1)
     t.setStyle(TableStyle([
         ("BACKGROUND",(0,0),(-1,0),colors.HexColor("#d9d9d9")),
         ("VALIGN",(0,0),(-1,0),"MIDDLE"),
