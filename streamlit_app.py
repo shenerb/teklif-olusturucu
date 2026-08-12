@@ -371,9 +371,12 @@ def pdf_olustur(urunler, musteri_adi, musteri_sehir, teklif_no, teklif_tarihi,
     toplam = 0
     for i, urun in enumerate(urunler, 1):
         fv = urun["fiyat"]; adet = urun.get("adet",1); toplam += fv * adet
+        # Uzun açıklamaları KeepInFrame ile sar — sayfa taşmasını önler
+        aciklama_p = para(urun["aciklama"], S_ACK)
+        aciklama_frame = KeepInFrame(C1, 800, [aciklama_p], mode='shrink')
         tbl.append([
             para(str(i),             sty(f"n{i}", alignment=TA_CENTER, fontSize=8)),
-            para(urun["aciklama"],   S_ACK),
+            aciklama_frame,
             para(str(adet),          sty(f"a{i}", alignment=TA_CENTER, fontSize=8)),
             para(_fmt_euro(fv),      sty(f"b{i}", alignment=TA_RIGHT,  fontSize=8)),
             para(_fmt_euro(fv*adet), sty(f"p{i}", alignment=TA_RIGHT,  fontSize=8)),
