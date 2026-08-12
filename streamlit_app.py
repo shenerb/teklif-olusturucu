@@ -25,7 +25,12 @@ except ImportError:
     HAS_PDF = False
 
 # Logo dosyadan oku
-LOGO_PATH = os.path.join(os.path.dirname(__file__), "logo.jpeg")
+try:
+    _BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+except NameError:
+    _BASE_DIR = os.path.abspath(".")
+
+LOGO_PATH = os.path.join(_BASE_DIR, "logo.jpeg")
 with open(LOGO_PATH, "rb") as f:
     LOGO_BYTES = f.read()
 
@@ -43,7 +48,7 @@ FIRMA_HTML = (
 )
 EURO_FMT = "#,##0.00\\ [$\u20ac-1]"
 
-AYARLAR_DOSYA = os.path.join(os.path.dirname(__file__), "ayarlar.json")
+AYARLAR_DOSYA = os.path.join(_BASE_DIR, "ayarlar.json")
 
 def ayarlari_yukle():
     v = {"iletisim_ad": "", "iletisim_tel": "", "iletisim_email": ""}
@@ -272,7 +277,10 @@ def excel_olustur(urunler, musteri_adi, musteri_sehir, teklif_no, teklif_tarihi,
     return len(urunler)
 
 def _reg_pdf_fonts():
-    base = os.path.dirname(os.path.abspath(__file__))
+    try:
+        base = os.path.dirname(os.path.abspath(__file__))
+    except NameError:
+        base = os.path.abspath(".")
     candidates = [
         # FreeSans — repo içinde, Türkçe destekler, temiz görünüm
         (os.path.join(base, "FreeSans.ttf"),
