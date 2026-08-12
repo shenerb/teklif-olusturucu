@@ -369,9 +369,20 @@ def pdf_olustur(urunler, musteri_adi, musteri_sehir, teklif_no, teklif_tarihi,
     toplam = 0
     for i, urun in enumerate(urunler, 1):
         fv = urun["fiyat"]; adet = urun.get("adet",1); toplam += fv * adet
+        # Açıklamayı satırlara böl, her satır ayrı paragraph
+        satirlar = urun["aciklama"].split("\n")
+        aciklama_paragraflar = []
+        for s in satirlar:
+            if s.strip():
+                aciklama_paragraflar.append(para(s.strip(), S_ACK))
+                aciklama_paragraflar.append(Spacer(1, 1))
+        if not aciklama_paragraflar:
+            aciklama_paragraflar = [para(urun["aciklama"], S_ACK)]
+        from reportlab.platypus import KeepInFrame
+        aciklama_cell = KeepInFrame(CW-C0-C2-C3-C4, PH-4*cm, aciklama_paragraflar, mode='shrink')
         tbl.append([
             para(str(i),             sty(f"n{i}", alignment=TA_CENTER, fontSize=8)),
-            para(urun["aciklama"],   S_ACK),
+            aciklama_cell,
             para(str(adet),          sty(f"a{i}", alignment=TA_CENTER, fontSize=8)),
             para(_fmt_euro(fv),      sty(f"b{i}", alignment=TA_RIGHT,  fontSize=8)),
             para(_fmt_euro(fv*adet), sty(f"p{i}", alignment=TA_RIGHT,  fontSize=8)),
