@@ -366,13 +366,24 @@ def pdf_olustur(urunler, musteri_adi, musteri_sehir, teklif_no, teklif_tarihi,
     toplam = 0
     for i, urun in enumerate(urunler, 1):
         fv = urun["fiyat"]; adet = urun.get("adet",1); toplam += fv * adet
+        satirlar = [s.strip() for s in urun["aciklama"].split("\n") if s.strip()]
+        # İlk satır: No, ilk açıklama satırı, adet, birim, toplam
         tbl.append([
-            para(str(i),             sty(f"n{i}", alignment=TA_CENTER, fontSize=8)),
-            para(urun["aciklama"],   S_ACK),
-            para(str(adet),          sty(f"a{i}", alignment=TA_CENTER, fontSize=8)),
-            para(_fmt_euro(fv),      sty(f"b{i}", alignment=TA_RIGHT,  fontSize=8)),
-            para(_fmt_euro(fv*adet), sty(f"p{i}", alignment=TA_RIGHT,  fontSize=8)),
+            para(str(i),               sty(f"n{i}", alignment=TA_CENTER, fontSize=8)),
+            para(satirlar[0] if satirlar else "", S_ACK),
+            para(str(adet),            sty(f"a{i}", alignment=TA_CENTER, fontSize=8)),
+            para(_fmt_euro(fv),        sty(f"b{i}", alignment=TA_RIGHT,  fontSize=8)),
+            para(_fmt_euro(fv*adet),   sty(f"p{i}", alignment=TA_RIGHT,  fontSize=8)),
         ])
+        # Sonraki satırlar: sadece açıklama devamı
+        for satir in satirlar[1:]:
+            tbl.append([
+                para("", sty(f"ne{i}", fontSize=8)),
+                para(satir, S_ACK),
+                para("", sty(f"ae{i}", fontSize=8)),
+                para("", sty(f"be{i}", fontSize=8)),
+                para("", sty(f"pe{i}", fontSize=8)),
+            ])
     if indirim and indirim > 0:
         tbl.append(["","","",
             hpara("<b>TOPLAM</b>", sty("tt",fontName=FONT_BOLD,alignment=TA_CENTER)),
